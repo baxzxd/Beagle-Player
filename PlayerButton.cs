@@ -15,7 +15,7 @@ namespace Music_Player_WPF
         private Image base_image;
         private BitmapImage Icon_Hovered;
         private BitmapImage Icon_Idle;
-        public PlayerButton(Image i, BitmapImage ih, BitmapImage ii)
+        public PlayerButton(Image i, BitmapImage ii, BitmapImage ih)
         {
             Icon_Hovered = ih;
             Icon_Idle = ii;

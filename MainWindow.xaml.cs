@@ -60,15 +60,13 @@ namespace Music_Player_WPF
             InitializeComponent();
             InitializeTimer();
             InitializeControlEvents();
+            StyleControls();
 
             MainGrid.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
             MainGrid.Arrange(new Rect(0, 0, MainGrid.DesiredSize.Width, MainGrid.DesiredSize.Height));
 
             playlist = new List<SongData>();
             
-
-            StyleControls();
-
             //Make options thingy
             Console.WriteLine("Begin file search");
             string current_directory = Directory.GetCurrentDirectory();
@@ -167,12 +165,17 @@ namespace Music_Player_WPF
             win2 = new Window1();
             win2.Show();
             win2.pathButton.Click += new RoutedEventHandler(SetPath_Button_Clicked);
+            win2.configSave.Click += new RoutedEventHandler(SaveConfig_Button_Clicked);
         }
 
         private void SetPath_Button_Clicked(object sender, RoutedEventArgs e)
         {
-            music_path = win2.pathTextBox.Text;
-            GetSongsFromPath(music_path);
+            win2.configText.Text += "\n" + win2.pathTextBox.Text;
+            //GetSongsFromPath(music_path);
+        }
+        private void SaveConfig_Button_Clicked(object sender, RoutedEventArgs e)
+        {
+            Console.WriteLine(win2.configText.Text);
         }
 
         private void Volume_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
