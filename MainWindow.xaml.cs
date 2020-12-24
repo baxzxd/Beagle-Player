@@ -26,6 +26,8 @@ namespace Music_Player_WPF
         private System.Threading.Timer _timer;
         private DispatcherTimer dispatcherTimer;
         private List<SongData> playlist;
+        private Window1 win2;
+        private string music_path;
         public float SliderToVolume
         {
             get
@@ -121,9 +123,22 @@ namespace Music_Player_WPF
         {
             control_Play_Image.Source = MyConstants.Play_Pressed_Icon;
         }
+
         private void Play_Left(object sender, EventArgs e)
         {
             control_Play_Image.Source = MyConstants.Play_Idle_Icon;
+        }
+        private void SetPath_Clicked(object sender, EventArgs e)
+        {
+            win2 = new Window1();
+            win2.Show();
+            win2.pathButton.Click += new RoutedEventHandler(SetPath_Button_Clicked);
+        }
+
+        private void SetPath_Button_Clicked(object sender, RoutedEventArgs e)
+        {
+            music_path = win2.pathTextBox.Text;
+            Console.WriteLine(music_path);
         }
 
         private void Volume_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -134,6 +149,11 @@ namespace Music_Player_WPF
         private void Timer_Tick(object sender, EventArgs e)
         {
             PlaybackBarUpdate();
+        }
+
+        public void CommonCommandBinding_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
         }
 
         private void PositionControls()
