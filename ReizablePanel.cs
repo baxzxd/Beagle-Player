@@ -13,8 +13,6 @@ namespace Music_Player_WPF
     public class ResizablePanel : StackPanel
     {
         private Canvas canvas;
-        private bool mouse_in_panel;
-        private bool is_dragging;
         private bool is_resizing;
 
         int width = 100;

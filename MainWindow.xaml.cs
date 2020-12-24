@@ -24,11 +24,15 @@ namespace Music_Player_WPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        private System.Threading.Timer _timer;
         private DispatcherTimer dispatcherTimer;
         private List<SongData> playlist;
         private Window1 win2;
         private string music_path;
+
+        private PlayerButton button_Play;
+        private PlayerButton button_Next;
+        private PlayerButton button_Previous;
+
         public float SliderToVolume
         {
             get
@@ -62,25 +66,10 @@ namespace Music_Player_WPF
 
             playlist = new List<SongData>();
             
-            headerTitle.Foreground = new SolidColorBrush(Color.FromRgb(200, 200, 200));
-            control_Timestamp.Foreground = new SolidColorBrush(Color.FromRgb(200, 200, 200));
 
-            MainGrid.Background = new SolidColorBrush(Color.FromRgb(45, 45, 45));
+            StyleControls();
 
-            //ColorGrid();
-            string primus_path = @"D:\My Music\Alice in Chains";
-            string image_path = "C:\\Users\\Adam Mason\\Pictures\\Album Covers\\Alice in Chains\\Dirt.jpg";
-
-
-            Image testImage = new Image();
-            testImage.Source = new BitmapImage(new Uri(image_path, UriKind.Relative));
-
-            control_Play_Image.Source = MyConstants.Play_Idle_Icon;
-            control_Next_Image.Source = MyConstants.ffw_Idle_Icon;
-            control_Previous_Image.Source = MyConstants.reverse_Idle_Icon;
-
-            headerImage.Source = MyConstants.HeaderImage;
-
+            //Make options thingy
             Console.WriteLine("Begin file search");
             string current_directory = Directory.GetCurrentDirectory();
             string[] files = Directory.GetFiles(current_directory);
@@ -93,62 +82,86 @@ namespace Music_Player_WPF
                     Console.WriteLine("Found config file");
                     string config_text = @System.IO.File.ReadAllText(files[i]);
                     GetSongsFromPath(config_text);
-                    Console.WriteLine(config_text);
                     string[] s = Directory.GetFiles(config_text);
-                    for( int j = 0; j < s.Length; j++ )
-                    {
-                        Console.WriteLine(s[j]);
-                    }
                     break;
                 }
             }
         }
 
+        private void StyleControls()
+        {
+            //Create button objects to add hover effect (Prolly not the best way but it works)
+            button_Play = new PlayerButton(control_Play_Image, MyConstants.Play_Idle_Icon, MyConstants.Play_Pressed_Icon);
+            button_Next = new PlayerButton(control_Next_Image, MyConstants.Next_Idle_Icon, MyConstants.Next_Pressed_Icon);
+            button_Previous = new PlayerButton(control_Previous_Image, MyConstants.Previous_Idle_Icon, MyConstants.Previous_Pressed_Icon);
+
+            //Set images
+            headerImage.Source = MyConstants.HeaderImage;
+
+            //Set Colors
+            //Standardize colors and later on allow customization
+            SolidColorBrush text_color = new SolidColorBrush(Color.FromRgb(200, 200, 200));
+            headerTitle.Foreground = text_color;
+            control_Timestamp.Foreground = text_color;
+            nowPlaying_Title.Foreground = text_color;
+            nowPlaying_Album.Foreground = text_color;
+            nowPlaying_Artist.Foreground = text_color;
+            MainGrid.Background = new SolidColorBrush(Color.FromRgb(45, 45, 45));
+
+            //Font setups
+            nowPlaying_Title.FontSize = 12;
+        }
+
         private void GetSongsFromPath(string p)
         {
             //Remove old songs need to create cache
-            if(this.testListView.Items.Count > 0 )
+            if(this.mainListView.Items.Count > 0 )
             {
-                for( int i = 0; i < this.testListView.Items.Count; i++ )
+                for( int i = 0; i < this.mainListView.Items.Count; i++ )
                 {
-                    this.testListView.Items.RemoveAt(0);
+                    this.mainListView.Items.RemoveAt(0);
                 }
             }
 
-
-            // Populate list
+            //Populate mainListView
             Dictionary<string, List<SongData>> albums = UsefulFunctions.GetSongDataFromPath(p);
             foreach (KeyValuePair<string, List<SongData>> t in albums)
             {
                 for (int i = 0; i < t.Value.Count; i++)
                 {
                     SongData temp_song = t.Value[i];
-                    this.testListView.Items.Add(temp_song);
+                    this.mainListView.Items.Add(temp_song);
                 }
             }
         }
 
         private void InitializeControlEvents()
         {
+            //Check if the window size has been changed (Does nothing yet as it doesnt need to)
             this.SizeChanged += new System.Windows.SizeChangedEventHandler(Window_SizeChanged);
+
+            //Volume changed
             this.control_Volume_Slider.ValueChanged += new System.Windows.RoutedPropertyChangedEventHandler<double>(Volume_Changed); 
-            this.Closing += new System.ComponentModel.CancelEventHandler(Window_Closing);
-            this.testListView.MouseDoubleClick += new MouseButtonEventHandler(PanelTest_MouseEnter);
 
+            //Song double clicked in main window
+            this.mainListView.MouseDoubleClick += new MouseButtonEventHandler(PanelTest_MouseEnter);
+
+            //Play button actions (Can prolly make this more standard)
             this.control_Play_Image.MouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(Play_Pressed);
-            this.control_Play_Image.MouseEnter += new System.Windows.Input.MouseEventHandler(Play_Entered);
-            this.control_Play_Image.MouseLeave += new System.Windows.Input.MouseEventHandler(Play_Left);
+
+            //Allow user to click on playbackBar to scrub
+            playbackBar.MouseDown += new System.Windows.Input.MouseButtonEventHandler(PlaybackBar_Clicked);
+
+            //Cleanup before closing
+            this.Closing += new System.ComponentModel.CancelEventHandler(Window_Closing);
         }
 
-        private void Play_Entered(object sender, EventArgs e)
+        private void PlaybackBar_Clicked(object sender, MouseEventArgs e)
         {
-            control_Play_Image.Source = MyConstants.Play_Pressed_Icon;
+            int new_value = (int)((e.GetPosition(playbackBar).X / playbackBar.ActualWidth) * playbackBar.Maximum);
+            playbackBar.Value = new_value;
         }
 
-        private void Play_Left(object sender, EventArgs e)
-        {
-            control_Play_Image.Source = MyConstants.Play_Idle_Icon;
-        }
         private void SetPath_Clicked(object sender, EventArgs e)
         {
             win2 = new Window1();
@@ -265,14 +278,11 @@ namespace Music_Player_WPF
                     playbackBar.Maximum = resolution;
                     playbackBar.Value = UsefulFunctions.Clamp(progress, 0, resolution);
 
-                    //playbackHandle. = new Point((int)(playbackBar.Width * p) - playbackBar.Width / 2, 0);
-
                     long total_seconds = (long)(AudioPlayer.soundOut.WaveSource.Position / AudioPlayer.soundOut.WaveSource.WaveFormat.BytesPerSecond);
                     int minutes = (int)(total_seconds / 60);
                     int seconds = (int)(total_seconds - (minutes * 60));
                     string time_string = minutes.ToString("00") + ":" + seconds.ToString("00");
                     control_Timestamp.Text = time_string + "/" + AudioPlayer.currentLength;
-                    //Console.WriteLine(timestamp.Text);
                 }
             }
         }

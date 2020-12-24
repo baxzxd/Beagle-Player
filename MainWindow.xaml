@@ -224,7 +224,7 @@
             </Menu>
         </DockPanel>
 
-        <ListView x:Name="testListView" Grid.Row="2"   VirtualizingPanel.IsVirtualizing="True"   ItemsSource="{Binding ListViewItemsCollections}" Style="{DynamicResource ListViewStyle1}" Margin="10,0,0,0">
+        <ListView x:Name="mainListView" Grid.Row="2"   VirtualizingPanel.IsVirtualizing="True"   ItemsSource="{Binding ListViewItemsCollections}" Style="{DynamicResource ListViewStyle1}" Margin="10,0,0,0">
             <ListView.ItemContainerStyle>
                 <Style TargetType="{x:Type ListViewItem}">
                     <Style.Resources>

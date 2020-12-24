@@ -31,10 +31,10 @@ namespace Music_Player_WPF
         public static BitmapImage Play_Idle_Icon = new BitmapImage(new Uri(@"/images/play_Idle_Icon.png", UriKind.Relative));
         public static BitmapImage Play_Pressed_Icon = new BitmapImage(new Uri(@"/images/play_Pressed_Icon.png", UriKind.Relative));
 
-        public static BitmapImage ffw_Idle_Icon = new BitmapImage(new Uri(@"/images/ffw_Idle_Icon.png", UriKind.Relative));
-        public static BitmapImage ffw_Pressed_Icon = new BitmapImage(new Uri(@"/images/ffw_Pressed_Icon.png", UriKind.Relative));
+        public static BitmapImage Next_Idle_Icon = new BitmapImage(new Uri(@"/images/ffw_Idle_Icon.png", UriKind.Relative));
+        public static BitmapImage Next_Pressed_Icon = new BitmapImage(new Uri(@"/images/ffw_Pressed_Icon.png", UriKind.Relative));
 
-        public static BitmapImage reverse_Idle_Icon = new BitmapImage(new Uri(@"/images/reverse_Idle_Icon.png", UriKind.Relative));
-        public static BitmapImage reverse_Pressed_Icon = new BitmapImage(new Uri(@"/images/reverse_Pressed_Icon.png", UriKind.Relative));
+        public static BitmapImage Previous_Idle_Icon = new BitmapImage(new Uri(@"/images/reverse_Idle_Icon.png", UriKind.Relative));
+        public static BitmapImage Previous_Pressed_Icon = new BitmapImage(new Uri(@"/images/reverse_Pressed_Icon.png", UriKind.Relative));
     }
 }

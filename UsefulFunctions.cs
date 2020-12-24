@@ -145,13 +145,12 @@ namespace Music_Player_WPF
 		public string Title { get; set; }
 		public string Length { get; set; }
 		public string path { get; set; }
-		public TagLib.File tag_file { get; set; }
 
 		public SongData(string song_path)
         {
 			path = song_path;
-			tag_file = TagLib.File.Create(path);
 
+			TagLib.File tag_file = TagLib.File.Create(path);
 			AlbumName = tag_file.Tag.Album;
 			Title = tag_file.Tag.Title;
 			Length = tag_file.Properties.Duration.ToString().Substring(0, 8);
