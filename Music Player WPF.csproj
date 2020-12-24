@@ -50,8 +50,8 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="TagLibSharp">
-      <HintPath>..\..\..\..\..\..\Download\taglib-sharp-TaglibSharp-2.2.0.0\src\TaglibSharp\bin\Release\net45\TagLibSharp.dll</HintPath>
+    <Reference Include="taglib-sharp, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\taglib-sharp-netstandard2.0.2.1.0\lib\netstandard2.0\taglib-sharp.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
@@ -130,6 +130,9 @@
     <Resource Include="images\play_Pressed_Icon.png" />
     <Resource Include="images\reverse_Idle_Icon.png" />
     <Resource Include="images\reverse_Pressed_Icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="config.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

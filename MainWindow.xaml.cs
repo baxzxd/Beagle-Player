@@ -13,6 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.IO;
 
 using TagLib;
 
@@ -60,19 +61,17 @@ namespace Music_Player_WPF
             MainGrid.Arrange(new Rect(0, 0, MainGrid.DesiredSize.Width, MainGrid.DesiredSize.Height));
 
             playlist = new List<SongData>();
-
-            //_timer = new System.Threading.Timer(_ => Timer_Tick(), null, 0, 100); //every 10 seconds
-
-            //playbackBar.Foreground = Brushes.Yellow;
+            
             headerTitle.Foreground = new SolidColorBrush(Color.FromRgb(200, 200, 200));
             control_Timestamp.Foreground = new SolidColorBrush(Color.FromRgb(200, 200, 200));
+
+            MainGrid.Background = new SolidColorBrush(Color.FromRgb(45, 45, 45));
+
             //ColorGrid();
             string primus_path = @"D:\My Music\Alice in Chains";
-            Dictionary<string, List<string>> albums = UsefulFunctions.GetAlbum(primus_path);
-
-
-            MainGrid.Background = new SolidColorBrush(Color.FromRgb(45,45,45)); //Brushes.Gray;
             string image_path = "C:\\Users\\Adam Mason\\Pictures\\Album Covers\\Alice in Chains\\Dirt.jpg";
+
+
             Image testImage = new Image();
             testImage.Source = new BitmapImage(new Uri(image_path, UriKind.Relative));
 
@@ -82,29 +81,51 @@ namespace Music_Player_WPF
 
             headerImage.Source = MyConstants.HeaderImage;
 
-            // Populate list
-            foreach(KeyValuePair<string, List<string>> t in albums)
+            Console.WriteLine("Begin file search");
+            string current_directory = Directory.GetCurrentDirectory();
+            string[] files = Directory.GetFiles(current_directory);
+            for( int i = 0; i < files.Length; i++ )
             {
-                string album_name = t.Key;
-                for( int i = 0; i < t.Value.Count; i++ )
+                string file_name = files[i].Substring(current_directory.Length + 1);
+                Console.WriteLine(file_name);
+                if( file_name == "config.txt" )
                 {
-                    var tfile = TagLib.File.Create(t.Value[i]);
-                    SongData temp_song = new SongData
+                    Console.WriteLine("Found config file");
+                    string config_text = @System.IO.File.ReadAllText(files[i]);
+                    GetSongsFromPath(config_text);
+                    Console.WriteLine(config_text);
+                    string[] s = Directory.GetFiles(config_text);
+                    for( int j = 0; j < s.Length; j++ )
                     {
-                        GridViewColumnName_LabelContent = "testt",
-                        AlbumName = album_name,
-                        AlbumImage_Source = image_path,
-                        Title = tfile.Tag.Title,
-                        Length = tfile.Properties.Duration.ToString().Substring(0,7),
-                        path = t.Value[i]
-                    };
+                        Console.WriteLine(s[j]);
+                    }
+                    break;
+                }
+            }
+        }
 
-                    this.testListView.Items.Add(temp_song);
+        private void GetSongsFromPath(string p)
+        {
+            //Remove old songs need to create cache
+            if(this.testListView.Items.Count > 0 )
+            {
+                for( int i = 0; i < this.testListView.Items.Count; i++ )
+                {
+                    this.testListView.Items.RemoveAt(0);
                 }
             }
 
-            //Margin testing
-            //PositionControls();
+
+            // Populate list
+            Dictionary<string, List<SongData>> albums = UsefulFunctions.GetSongDataFromPath(p);
+            foreach (KeyValuePair<string, List<SongData>> t in albums)
+            {
+                for (int i = 0; i < t.Value.Count; i++)
+                {
+                    SongData temp_song = t.Value[i];
+                    this.testListView.Items.Add(temp_song);
+                }
+            }
         }
 
         private void InitializeControlEvents()
@@ -138,7 +159,7 @@ namespace Music_Player_WPF
         private void SetPath_Button_Clicked(object sender, RoutedEventArgs e)
         {
             music_path = win2.pathTextBox.Text;
-            Console.WriteLine(music_path);
+            GetSongsFromPath(music_path);
         }
 
         private void Volume_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -266,13 +287,4 @@ namespace Music_Player_WPF
         }
     }
 
-    public class SongData
-    {
-        public string AlbumName { get; set; }
-        public string GridViewColumnName_LabelContent { get; set; }
-        public string AlbumImage_Source { get; set; }
-        public string Title { get; set; }
-        public string Length { get; set; }
-        public string path { get; set; }
-    }
 }
