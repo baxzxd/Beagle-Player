@@ -62,26 +62,45 @@ namespace Music_Player_WPF
             InitializeControlEvents();
             StyleControls();
 
+            MyConstants.init();
+
+            //Temp
+            //Remove old songs need to create cache
+
+            if (this.mainListView.Items.Count > 0)
+            {
+                for (int i = 0; i < this.mainListView.Items.Count; i++)
+                {
+                    this.mainListView.Items.RemoveAt(0);
+                }
+            }
+
+
+            //Temp
+            AddSongs();
+
             MainGrid.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
             MainGrid.Arrange(new Rect(0, 0, MainGrid.DesiredSize.Width, MainGrid.DesiredSize.Height));
 
             playlist = new List<SongData>();
             
-            //Make options thingy
-            string current_directory = Directory.GetCurrentDirectory();
-            string[] files = Directory.GetFiles(current_directory);
-            for( int i = 0; i < files.Length; i++ )
+        }
+
+        private void AddSongs()
+        {
+            Dictionary<string, AlbumData> albums_found = null;
+            if (albums_found != null)
             {
-                string file_name = files[i].Substring(current_directory.Length + 1);
-                if( file_name == "config.txt" )
+                foreach (KeyValuePair<string, AlbumData> t in albums_found)
                 {
-                    string config_text = @System.IO.File.ReadAllText(files[i]);
-                    GetSongsFromPath(config_text);
-                    break;
+                    for (int i = 0; i < t.Value.tracks.Count; i++)
+                    {
+                        SongData temp_song = t.Value.tracks[i];
+                        this.mainListView.Items.Add(temp_song);
+                    }
                 }
             }
         }
-
         private void StyleControls()
         {
             //Create button objects to add hover effect (Prolly not the best way but it works)
@@ -106,33 +125,6 @@ namespace Music_Player_WPF
             nowPlaying_Title.FontSize = 12;
         }
 
-        private void GetSongsFromPath(string p)
-        {
-            //Remove old songs need to create cache
-            if(this.mainListView.Items.Count > 0 )
-            {
-                for( int i = 0; i < this.mainListView.Items.Count; i++ )
-                {
-                    this.mainListView.Items.RemoveAt(0);
-                }
-            }
-
-            //Populate mainListView
-            Dictionary<string, AlbumData> albums = MediaTools.GetSongDataFromPath(p, new Dictionary<string, AlbumData>());
-            if( albums != null )
-            {
-                foreach (KeyValuePair<string, AlbumData> t in albums)
-                {
-                    MediaTools.SaveAlbum(t.Value, @"C:\Users\Adam Mason\source\repos\Beagle-Player\bin\Debug\");
-                    for (int i = 0; i < t.Value.tracks.Count; i++)
-                    {
-                        SongData temp_song = t.Value.tracks[i];
-                        this.mainListView.Items.Add(temp_song);
-                    }
-                }
-            }
-        }
-        
 
         private void InitializeControlEvents()
         {
@@ -157,25 +149,51 @@ namespace Music_Player_WPF
 
         private void PlaybackBar_Clicked(object sender, MouseEventArgs e)
         {
-            int new_value = (int)((e.GetPosition(playbackBar).X / playbackBar.ActualWidth) * playbackBar.Maximum);
+            double percent = e.GetPosition(playbackBar).X / playbackBar.ActualWidth;
+            int new_value = (int)(percent * playbackBar.Maximum);
             playbackBar.Value = new_value;
+            AudioPlayer.soundOut.WaveSource.Position = (long)(AudioPlayer.soundOut.WaveSource.Length * percent);
         }
 
         private void SetPath_Clicked(object sender, EventArgs e)
         {
             win2 = new Window1();
             win2.Show();
+
+            for (int i = 0; i < MyConstants.user_preferences.music_directories.Count; i++)
+            {
+                win2.listPaths.Items.Add(MyConstants.user_preferences.music_directories[i]);
+            }
+
             win2.pathButton.Click += new RoutedEventHandler(SetPath_Button_Clicked);
             win2.configSave.Click += new RoutedEventHandler(SaveConfig_Button_Clicked);
         }
 
         private void SetPath_Button_Clicked(object sender, RoutedEventArgs e)
         {
-            //win2.configText.Text += "\n" + win2.pathTextBox.Text;
+            string text = win2.pathTextBox.Text;
+            if( UsefulFunctions.IsPathValid(text))
+            {
+                Console.WriteLine("Path Added");
+                ListBoxItem lvi = new ListBoxItem();
+                lvi.Content = win2.pathTextBox.Text;
+                win2.listPaths.Items.Add(lvi);
+            }
+            else
+            {
+                Console.WriteLine("Invalid path");
+            }
+            win2.pathTextBox.Text = "";
         }
         private void SaveConfig_Button_Clicked(object sender, RoutedEventArgs e)
         {
-            //Console.WriteLine(win2.configText.Text);
+            MyConstants.user_preferences.music_directories = new List<string>();
+            for( int i = 0; i < win2.listPaths.Items.Count; i++ )
+            {
+                ListBoxItem lbi = (ListBoxItem)win2.listPaths.Items[i];
+                MyConstants.user_preferences.music_directories.Add(lbi.Content.ToString());
+                Console.WriteLine("Saved directory : " + lbi.Content.ToString());
+            }
         }
 
         private void Volume_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)

@@ -19,7 +19,7 @@
                     <Button Name="pathButton" Width="80" Height="20" Content="Add Path" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                 </StackPanel>
                 <Button Name="configSave" Content="Save Paths" Width="80" Height="20" Grid.Row="2"/>
-                <ListBox HorizontalAlignment="Left" Height="61" Margin="5,10,0,0" Grid.Row="1" VerticalAlignment="Top" Width="371"/>
+                <ListBox x:Name="listPaths" HorizontalAlignment="Left" Height="61" Margin="5,10,0,0" Grid.Row="1" VerticalAlignment="Top" Width="371"/>
             </Grid>
         </TabItem>
         <TabItem Header="Appearance">

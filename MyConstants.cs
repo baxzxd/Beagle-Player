@@ -6,24 +6,25 @@ using System.Threading.Tasks;
 using System.Drawing;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.IO;
+using System.Xml.Serialization;
 
 namespace Music_Player_WPF
 {
+    public class Preferences
+    {
+        public List<string> music_directories { get; set; }
+
+        public Preferences()
+        {
+        }
+    }
     public static class MyConstants
     {
-        /*
-        public static bool initCheck = false;
-        public static System.Drawing.Color formBackColor = System.Drawing.Color.FromArgb(45, 45, 45);
-        public static System.Drawing.Color headerBackColor = System.Drawing.Color.FromArgb(60, 60, 60);
-        public static System.Drawing.Color headerTextColor = System.Drawing.Color.FromArgb(200, 200, 200);
-        
-        public static System.Drawing.Color resizablePanelBackColor = System.Drawing.Color.FromArgb(45, 45, 45);
-        public static System.Drawing.Color resizablePanelFrontColor = System.Drawing.Color.FromArgb(80, 80, 80);
-        public static System.Drawing.Color resizablePanelFrontColorSelected = System.Drawing.Color.FromArgb(100, 100, 100);
+        public static string CurrentDirectory = Directory.GetCurrentDirectory();
+        public static string ConfigName = "config.bpc";
 
-        public static Font headerFont = new Font("Microsoft Sans Serif", 12);
-        public static Font bodyFont = new Font("Microsoft Sans Serif", 8);
-        */
+        public static Preferences user_preferences;
 
         public static BitmapImage HeaderImage = new BitmapImage(new Uri(@"/images/logo.png", UriKind.Relative));
         public static BitmapImage PlayImage = new BitmapImage(new Uri(@"/images/play_white.png", UriKind.Relative));
@@ -36,5 +37,46 @@ namespace Music_Player_WPF
 
         public static BitmapImage Previous_Idle_Icon = new BitmapImage(new Uri(@"/images/reverse_Idle_Icon.png", UriKind.Relative));
         public static BitmapImage Previous_Pressed_Icon = new BitmapImage(new Uri(@"/images/reverse_Pressed_Icon.png", UriKind.Relative));
+
+        public static void init()
+        {
+            bool config_exists = LoadPreferences();
+            if( !config_exists )
+            {
+                user_preferences = new Preferences();
+                SavePreferences();
+            }
+        }
+
+        public static bool LoadPreferences()
+        {
+            bool config_exists = false;
+            string[] files = Directory.GetFiles(MyConstants.CurrentDirectory);
+            for (int i = 0; i < files.Length; i++)
+            {
+                string file_name = files[i].Substring(MyConstants.CurrentDirectory.Length + 1);
+                if (file_name == MyConstants.ConfigName)
+                {
+                    Preferences p = new Preferences();
+                    XmlSerializer formatter = new XmlSerializer(p.GetType());
+                    FileStream songDataFile = new FileStream(files[i], FileMode.Open);
+                    byte[] buffer = new byte[songDataFile.Length];
+                    songDataFile.Read(buffer, 0, (int)songDataFile.Length);
+                    MemoryStream stream = new MemoryStream(buffer);
+                    user_preferences = (Preferences)formatter.Deserialize(stream);
+
+                    config_exists = true;
+                }
+            }
+            return config_exists;
+        }
+
+        public static void SavePreferences()
+        {
+            string full_path = CurrentDirectory + @"\" + ConfigName;
+            FileStream outFile = File.Create(full_path);
+            XmlSerializer formatter = new XmlSerializer(user_preferences.GetType());
+            formatter.Serialize(outFile, user_preferences);
+        }
     }
 }
