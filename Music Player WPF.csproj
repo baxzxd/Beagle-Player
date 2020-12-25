@@ -64,6 +64,7 @@
     </ApplicationDefinition>
     <Compile Include="AudioPlayer.cs" />
     <Compile Include="Class1.cs" />
+    <Compile Include="MediaData.cs" />
     <Compile Include="PlayerButton.cs" />
     <Compile Include="UsefulFunctions.cs" />
     <Compile Include="Window1.xaml.cs">

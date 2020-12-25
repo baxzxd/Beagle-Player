@@ -68,19 +68,15 @@ namespace Music_Player_WPF
             playlist = new List<SongData>();
             
             //Make options thingy
-            Console.WriteLine("Begin file search");
             string current_directory = Directory.GetCurrentDirectory();
             string[] files = Directory.GetFiles(current_directory);
             for( int i = 0; i < files.Length; i++ )
             {
                 string file_name = files[i].Substring(current_directory.Length + 1);
-                Console.WriteLine(file_name);
                 if( file_name == "config.txt" )
                 {
-                    Console.WriteLine("Found config file");
                     string config_text = @System.IO.File.ReadAllText(files[i]);
                     GetSongsFromPath(config_text);
-                    string[] s = Directory.GetFiles(config_text);
                     break;
                 }
             }
@@ -122,16 +118,21 @@ namespace Music_Player_WPF
             }
 
             //Populate mainListView
-            Dictionary<string, List<SongData>> albums = UsefulFunctions.GetSongDataFromPath(p);
-            foreach (KeyValuePair<string, List<SongData>> t in albums)
+            Dictionary<string, AlbumData> albums = MediaTools.GetSongDataFromPath(p, new Dictionary<string, AlbumData>());
+            if( albums != null )
             {
-                for (int i = 0; i < t.Value.Count; i++)
+                foreach (KeyValuePair<string, AlbumData> t in albums)
                 {
-                    SongData temp_song = t.Value[i];
-                    this.mainListView.Items.Add(temp_song);
+                    MediaTools.SaveAlbum(t.Value, @"C:\Users\Adam Mason\source\repos\Beagle-Player\bin\Debug\");
+                    for (int i = 0; i < t.Value.tracks.Count; i++)
+                    {
+                        SongData temp_song = t.Value.tracks[i];
+                        this.mainListView.Items.Add(temp_song);
+                    }
                 }
             }
         }
+        
 
         private void InitializeControlEvents()
         {
@@ -170,12 +171,11 @@ namespace Music_Player_WPF
 
         private void SetPath_Button_Clicked(object sender, RoutedEventArgs e)
         {
-            win2.configText.Text += "\n" + win2.pathTextBox.Text;
-            //GetSongsFromPath(music_path);
+            //win2.configText.Text += "\n" + win2.pathTextBox.Text;
         }
         private void SaveConfig_Button_Clicked(object sender, RoutedEventArgs e)
         {
-            Console.WriteLine(win2.configText.Text);
+            //Console.WriteLine(win2.configText.Text);
         }
 
         private void Volume_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -193,33 +193,6 @@ namespace Music_Player_WPF
             e.CanExecute = true;
         }
 
-        private void PositionControls()
-        {
-            double control_panel_width = MainGrid.ColumnDefinitions[0].ActualWidth;
-            double control_panel_height = MainGrid.RowDefinitions[2].ActualHeight;
-
-            double play_image_x = (control_panel_width / 2);// - (controlPanelButtonGroup.Width / 2);
-            double play_image_y = (control_panel_height / 2);// - (controlPanelButtonGroup.Height / 2);
-
-            //Margin="left,top,right,bottom"
-            Thickness margin = new Thickness();
-            margin.Left = 0;
-            margin.Right = 0;
-            margin.Top = 0;
-            margin.Bottom = 0;
-            controlPanelButtonGroup.Margin = margin;
-            Console.WriteLine("Left Margin:" + play_image_x);
-
-            playbackBar.Width = control_panel_width - 20;
-            playbackBar.Height = 5;
-            Thickness progressBar_Margin = new Thickness();
-            progressBar_Margin.Left = 10;
-            progressBar_Margin.Right = 10;
-            progressBar_Margin.Top = 5;
-            progressBar_Margin.Bottom = 5;
-            playbackBar.Margin = progressBar_Margin;
-        }
-
         private void PanelTest_MouseEnter(object sender, MouseEventArgs e)
         {
             var item = (sender as ListView).SelectedItem;
@@ -228,19 +201,16 @@ namespace Music_Player_WPF
                 SongData i = (SongData)item;
                 AudioPlayer.Open(i.path);
                 AudioPlayer.Play();
+                AudioPlayer.currentLength = AudioPlayer.GetLengthString();
 
-                long total_seconds = (long)(AudioPlayer.soundOut.WaveSource.Length / AudioPlayer.soundOut.WaveSource.WaveFormat.BytesPerSecond);
-                int minutes = (int)(total_seconds / 60);
-                int seconds = (int)(total_seconds - (minutes * 60));
-                string time_string = minutes.ToString("00") + ":" + seconds.ToString("00");
-                AudioPlayer.currentLength = time_string;
                 playlistListView.Items.Add(i);
 
-                var tfile = TagLib.File.Create(i.path);
-                nowPlaying_Art.Source = UsefulFunctions.GetAlbumArt(tfile);
-                nowPlaying_Title.Text = tfile.Tag.Title;
-                nowPlaying_Album.Text = tfile.Tag.Album;
-                nowPlaying_Artist.Text = tfile.Tag.Artists[0];
+                //Setup caching of art by artist perhaps?
+                //nowPlaying_Art.Source = UsefulFunctions.GetAlbumArt(tfile);
+
+                nowPlaying_Title.Text = i.Title;
+                nowPlaying_Album.Text = i.AlbumName; 
+                nowPlaying_Artist.Text = i.Artist;
             }
         }
 

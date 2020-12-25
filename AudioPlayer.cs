@@ -99,5 +99,33 @@ namespace Music_Player_WPF
                 waveSource = null;
             }
         }
+
+        public static string GetLengthString()
+        {
+            //Length and Position are the total bytes so divide by bitrate to get seconds
+            long total_seconds = (long)(soundOut.WaveSource.Length / soundOut.WaveSource.WaveFormat.BytesPerSecond);
+
+            //Get minutes and subtract from seconds
+            int minutes = (int)(total_seconds / 60);
+            int seconds = (int)(total_seconds - (minutes * 60));
+
+            //String formatting
+            string time_string = minutes.ToString("00") + ":" + seconds.ToString("00");
+            return time_string;
+        }
+
+        public static string GetPositionString()
+        {
+            //Length and Position are the total bytes so divide by bitrate to get seconds
+            long total_seconds = (long)(soundOut.WaveSource.Position / soundOut.WaveSource.WaveFormat.BytesPerSecond);
+
+            //Get minutes and subtract from seconds
+            int minutes = (int)(total_seconds / 60);
+            int seconds = (int)(total_seconds - (minutes * 60));
+
+            //String formatting
+            string time_string = minutes.ToString("00") + ":" + seconds.ToString("00");
+            return time_string;
+        }
     }
 }
