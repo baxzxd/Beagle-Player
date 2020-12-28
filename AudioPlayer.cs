@@ -19,6 +19,19 @@ namespace Music_Player_WPF
 {
     public static class AudioPlayer
     {
+
+        public static string CurrentTimestamp
+        {
+            get
+            {
+                long total_seconds = (long)(AudioPlayer.soundOut.WaveSource.Position / AudioPlayer.soundOut.WaveSource.WaveFormat.BytesPerSecond);
+                int minutes = (int)(total_seconds / 60);
+                int seconds = (int)(total_seconds - (minutes * 60));
+                string time_string = minutes.ToString("00") + ":" + seconds.ToString("00");
+                return time_string;
+            }
+        }
+
         public static event EventHandler<PlaybackStoppedEventArgs> PlaybackStopped;
         public static PlaybackState PlaybackState
         {
@@ -71,7 +84,6 @@ namespace Music_Player_WPF
             soundOut = new WasapiOut() { Latency = 100, Device = device };
             soundOut.Initialize(waveSource);
             if (PlaybackStopped != null) soundOut.Stopped += PlaybackStopped;
-            SetVolume(.1f);
         }
 
         private static MMDevice GetAudioDevice()

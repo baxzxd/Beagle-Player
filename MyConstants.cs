@@ -15,12 +15,15 @@ namespace Music_Player_WPF
     {
         public List<string> music_directories { get; set; }
 
+        public int[] TextColor_rgb;
+            
         public Preferences()
         {
         }
     }
     public static class MyConstants
     {
+        public static string CacheDirectory = "cache";
         public static string CurrentDirectory = Directory.GetCurrentDirectory();
         public static string ConfigName = "config.bpc";
 
@@ -37,6 +40,8 @@ namespace Music_Player_WPF
 
         public static BitmapImage Previous_Idle_Icon = new BitmapImage(new Uri(@"/images/reverse_Idle_Icon.png", UriKind.Relative));
         public static BitmapImage Previous_Pressed_Icon = new BitmapImage(new Uri(@"/images/reverse_Pressed_Icon.png", UriKind.Relative));
+
+        public static SolidColorBrush TextColor = new SolidColorBrush(Color.FromRgb(200, 200, 200));
 
         public static void init()
         {
