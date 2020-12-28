@@ -73,7 +73,5 @@ namespace Music_Player_WPF
             MediaTools.ClearCache();
             //ClearSongs();
         }
-
-
     }
 }

@@ -166,7 +166,6 @@ namespace Music_Player_WPF
 		public static List<AlbumData> GetAlbumByArtist(string artist)
 		{
 			List<AlbumData> found_albums = new List<AlbumData>();
-
 			foreach (KeyValuePair<string, AlbumData> t in albums)
 			{
 				string temp_artist = t.Value.Artist;
@@ -176,100 +175,24 @@ namespace Music_Player_WPF
 					found_albums.Add(t.Value);
 				}
 			}
-
 			return found_albums;
 		}
 
 		public static void ClearCache()
 		{
+			albums = new Dictionary<string, AlbumData>();
 			string[] cache_files = Directory.GetFiles(MyConstants.CacheDirectory);
 			for (int i = 0; i < cache_files.Length; i++)
 			{
 				System.IO.File.Delete(cache_files[i]);
 			}
-			albums = new Dictionary<string, AlbumData>();
 		}
-
-		//New New version of GetAlbum
-		public static Dictionary<string, AlbumData> GetSongDataFromPath(string path, Dictionary<string, AlbumData> albums = null)
-		{
-			if (albums == null)
-				albums = new Dictionary<string, AlbumData>();
-
-			string current_directory = Directory.GetCurrentDirectory();
-			string cache_directory = current_directory + @"\" + MyConstants.CacheDirectory + @"\";
-
-			//Get all subfolders from path  and add path argument
-			List<string> song_paths = UsefulFunctions.GetAllFilePaths(path);
-			for (int i = 0; i < song_paths.Count; i++)
-			{
-				if (ValidMediaFormat(song_paths[i]))
-				{
-					//Create tag file to get album name
-					var tfile = TagLib.File.Create(song_paths[i]);
-					string albumName = tfile.Tag.Album;
-
-					//TODO - Add unknown album
-					if (albumName != null)
-					{
-						//If album has not been found create new object
-						if (!albums.ContainsKey(albumName))
-						{
-							//
-							//CHANGE
-							string album_artist = tfile.Tag.Performers[0];
-							if (album_artist == null)
-							{
-								album_artist = MediaTools.DefaultSongArtist;
-							}
-
-							AlbumData new_album = new AlbumData(albumName, album_artist);
-							albums.Add(albumName, new_album);
-						}
-
-						SongData new_song = new SongData(tfile, song_paths[i]);
-
-						//Check to see if album already contains song
-						bool existing_song = albums[albumName].ContainsSong(new_song);
-
-						if (!existing_song)
-						{
-							//Add song to new Album's track listing
-							new_song.AlbumGUID = albums[albumName].GUID;
-							albums[albumName].tracks.Add(new_song);
-
-							//If there hasnt been art found for the album check new song for art
-							if (!albums[albumName].HasArt && tfile.Tag.Pictures.Length > 0)
-							{
-								//Make sure it doesnt save art again
-								albums[albumName].HasArt = true;
-
-								//Get picture, save it with albums GUID
-								BitmapImage album_art = GetAlbumArt(tfile);
-								UsefulFunctions.SaveBitmapImage(album_art, cache_directory + albums[albumName].GUID);
-							}
-						}
-					}
-				}
-			}
-
-			foreach (KeyValuePair<string, AlbumData> t in albums)
-			{
-				if (!File.Exists(cache_directory + t.Value.GUID + ".bdb"))
-				{
-					SaveAlbum(t.Value, cache_directory);
-				}
-			}
-
-			return albums;
-		}
-
 		public static BitmapImage GetAlbumArt(TagLib.File tfile, int width = 512, int height = 512)
 		{
 			try
 			{
 				MemoryStream ms = new MemoryStream(tfile.Tag.Pictures[0].Data.Data);
-				BitmapImage bitmap = UsefulFunctions.SaveBitmapImageFromStream(ms, width, height);
+				BitmapImage bitmap = UsefulFunctions.LoadBitmapImageFromStream(ms, width, height);
 				return bitmap;
 			}
 			catch (System.Exception)

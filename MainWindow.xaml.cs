@@ -29,7 +29,6 @@ namespace Music_Player_WPF
         private DispatcherTimer dispatcherTimer;
         private List<SongData> playlist;
         private OptionsWindow optionsWindow;
-        private string music_path;
 
         private PlayerButton button_Play;
         private PlayerButton button_Next;
@@ -44,23 +43,9 @@ namespace Music_Player_WPF
                 return (float)control_Volume_Slider.Value / 100f;
             }
         }
+
         public MainWindow()
         {
-            //XAML Stuffs
-            /*
-             * <Image x:Name="AlbumImage" Width="100" Height="50" Source="{Binding AlbumImage_Source}" />
-             * 
-                    <GridViewColumn x:Name="Header_Album" Header="Album"  Width="200">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Content="{Binding AlbumName}" Height="30"  />
-                                </StackPanel>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-             */
-
             InitializeComponent();
             InitializeTimer();
             InitializeControlEvents();
@@ -77,8 +62,6 @@ namespace Music_Player_WPF
             MainGrid.Arrange(new Rect(0, 0, MainGrid.DesiredSize.Width, MainGrid.DesiredSize.Height));
 
             playlist = new List<SongData>();
-
-
         }
 
         private void BackgroundWorkerSetup()
@@ -112,7 +95,7 @@ namespace Music_Player_WPF
         GridViewColumnHeader _lastHeaderClicked = null;
         ListSortDirection _lastDirection = ListSortDirection.Ascending;
 
-        void GridViewColumnHeaderClickedHandler(object sender, RoutedEventArgs e)
+        private void GridViewColumnHeaderClickedHandler(object sender, RoutedEventArgs e)
         {
             GridViewColumnHeader headerClicked = e.OriginalSource as GridViewColumnHeader;
             ListSortDirection direction;
@@ -232,22 +215,6 @@ namespace Music_Player_WPF
             for (int i = 0; i < found_albums.Count; i++)
             {
                 for (int j = 0; j < found_albums[i].tracks.Count; j++)
-                {
-                    this.mainListView.Items.Add(found_albums[i].tracks[j]);
-                }
-            }
-        }
-
-        private void testClicked(object sender, RoutedEventArgs e)
-        {
-            Console.WriteLine("test clicked");
-            List<AlbumData> found_albums = MediaTools.GetAlbumByArtist("Alice in Chains");
-
-            ClearSongs();
-
-            for( int i = 0; i < found_albums.Count; i++ )
-            {
-                for( int j = 0; j < found_albums[i].tracks.Count; j++ )
                 {
                     this.mainListView.Items.Add(found_albums[i].tracks[j]);
                 }

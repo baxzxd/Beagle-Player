@@ -32,10 +32,14 @@
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="File">
                     <MenuItem Header="Options" Click="Options_Clicked"/>
+                    <MenuItem Header="Scan" Click="ScanButton_Clicked"/>
                     <Separator/>
                     <MenuItem Header="Exit"/>
                 </MenuItem>
                 <ProgressBar x:Name="progressBar1" Height="10" Width="100"/>
+                <TextBlock Text="Search by Artist:"/>
+                <TextBox x:Name="artistSearchBox" Width="200" Margin="1"/>
+                <Button x:Name="artistSearchButton" Width="40" Height="20"/>
             </Menu>
         </DockPanel>
 

@@ -23,10 +23,9 @@ namespace Music_Player_WPF
     }
     public static class MyConstants
     {
-        public static string CacheDirectory = "cache";
-        public static string CurrentDirectory = Directory.GetCurrentDirectory();
         public static string ConfigName = "config.bpc";
         public static string CacheDirectory = "cache";
+        public static string CurrentDirectory = Directory.GetCurrentDirectory();
 
         public static Preferences user_preferences;
 

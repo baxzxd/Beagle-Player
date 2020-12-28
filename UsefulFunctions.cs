@@ -73,7 +73,7 @@ namespace Music_Player_WPF
 			}
 		}
 
-		public static BitmapImage SaveBitmapImageFromStream(MemoryStream ms, int width, int height)
+		public static BitmapImage LoadBitmapImageFromStream(MemoryStream ms, int width, int height)
 		{
 			var bitmap = new BitmapImage();
 			bitmap.BeginInit();
