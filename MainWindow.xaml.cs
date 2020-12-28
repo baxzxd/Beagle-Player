@@ -238,6 +238,22 @@ namespace Music_Player_WPF
             }
         }
 
+        private void testClicked(object sender, RoutedEventArgs e)
+        {
+            Console.WriteLine("test clicked");
+            List<AlbumData> found_albums = MediaTools.GetAlbumByArtist("Alice in Chains");
+
+            ClearSongs();
+
+            for( int i = 0; i < found_albums.Count; i++ )
+            {
+                for( int j = 0; j < found_albums[i].tracks.Count; j++ )
+                {
+                    this.mainListView.Items.Add(found_albums[i].tracks[j]);
+                }
+            }
+        }
+
         private void PlaybackBar_Clicked(object sender, MouseEventArgs e)
         {
             double percent = e.GetPosition(playbackBar).X / playbackBar.ActualWidth;
