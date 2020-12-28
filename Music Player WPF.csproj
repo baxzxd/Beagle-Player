@@ -138,5 +138,8 @@
   <ItemGroup>
     <Resource Include="config.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\long-neck-doge.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
