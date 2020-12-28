@@ -14,6 +14,7 @@ using CSCore.Win32;
 using CSCore.SoundOut;
 using CSCore;
 using CSCore.Codecs;
+using CSCore.Streams.Effects;
 
 namespace Music_Player_WPF
 {
@@ -43,6 +44,7 @@ namespace Music_Player_WPF
             }
         }
 
+        private static Equalizer equalizer;
         public static ISoundOut soundOut;
         public static IWaveSource waveSource;
 
@@ -52,6 +54,7 @@ namespace Music_Player_WPF
         {
             if (soundOut != null)
                 soundOut.Play();
+
         }
 
         public static void Stop()
@@ -79,6 +82,7 @@ namespace Music_Player_WPF
             waveSource =
                 CodecFactory.Instance.GetCodec(filename)
                     .ToSampleSource()
+                    .AppendSource(Equalizer.Create10BandEqualizer, out equalizer)
                     .ToWaveSource();
             
             soundOut = new WasapiOut() { Latency = 100, Device = device };

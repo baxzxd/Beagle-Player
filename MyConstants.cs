@@ -26,6 +26,7 @@ namespace Music_Player_WPF
         public static string CacheDirectory = "cache";
         public static string CurrentDirectory = Directory.GetCurrentDirectory();
         public static string ConfigName = "config.bpc";
+        public static string CacheDirectory = "cache";
 
         public static Preferences user_preferences;
 
@@ -51,6 +52,8 @@ namespace Music_Player_WPF
                 user_preferences = new Preferences();
                 SavePreferences();
             }
+
+            MediaTools.init();
         }
 
         public static bool LoadPreferences()
@@ -70,6 +73,7 @@ namespace Music_Player_WPF
                     MemoryStream stream = new MemoryStream(buffer);
                     user_preferences = (Preferences)formatter.Deserialize(stream);
 
+                    Console.WriteLine("Config file exists!");
                     config_exists = true;
                 }
             }
