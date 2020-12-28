@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Music_Player_WPF"
         xmlns:Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero2" x:Class="Music_Player_WPF.MainWindow"
         mc:Ignorable="d"
-        Title="MainWindow" Height="504.889" Width="961.802">
+        Title="Beagle Player" Height="504.889" Width="961.802" Icon = "pack://application:,,,/Music Player WPF;component/Images/logo.png">
 
 
     <Window.Resources>
@@ -21,35 +21,47 @@
             <ColumnDefinition Width="200" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="20" />
+            <RowDefinition Height="30" />
             <RowDefinition Height="40" />
             <RowDefinition Height="*"/>
-            <RowDefinition Height="80" />
+            <RowDefinition Height="85" />
         </Grid.RowDefinitions>
 
 
-        <DockPanel Grid.Row="0" Grid.ColumnSpan="2" Height="20">
+        <DockPanel Grid.Row="0" Grid.ColumnSpan="2" Height="20" Margin="0,0,0,10">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="File">
                     <MenuItem Header="Set Path" Click="SetPath_Clicked"/>
                     <Separator/>
                     <MenuItem Header="Exit"/>
                 </MenuItem>
+                <ProgressBar x:Name="progressBar1" Height="10" Width="100"/>
             </Menu>
         </DockPanel>
 
-        <ListView x:Name="playlistListView" Grid.Column="1" Margin="10" Grid.Row="2" >
-            <ListView.View>
-                <GridView AllowsColumnReorder="True">
-                    <GridViewColumn x:Name="Playlist_Header_Title" Header="Title" Width="120" DisplayMemberBinding="{Binding Title}" />
-                    <GridViewColumn x:Name="Playlist_Header_Length" Header="Length" Width="40" DisplayMemberBinding="{Binding Length}" />
-                </GridView>
-            </ListView.View>
-        </ListView>
+        <Grid x:Name="playlistSection"  Grid.Column="1" Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="30" />
+            </Grid.RowDefinitions>
+            <ListView x:Name="playlistListView" Grid.Row="0" Margin="10">
+                <ListView.View>
+                    <GridView AllowsColumnReorder="True">
+                        <GridViewColumn x:Name="Playlist_Header_Title" Header="Title" Width="120" DisplayMemberBinding="{Binding Title}" />
+                        <GridViewColumn x:Name="Playlist_Header_Length" Header="Length" Width="40" DisplayMemberBinding="{Binding Length}" />
+                    </GridView>
+                </ListView.View>
+            </ListView>
+            <StackPanel x:Name="playlistControls" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Button x:Name="playlistLoad" Content="Load" Width="60" Height="30" Margin="0,0,5,0"/>
+                <Button x:Name="playlistSave" Content="Save" Width="60" Height="30" Margin="5,0,0,0"/>
+                <Button x:Name="testButton" Content="test" Width="60" Height="30" Margin="5,0,0,0"/>
+            </StackPanel>
+        </Grid>
 
-        <StackPanel x:Name="headerPanel" Orientation="Horizontal" Grid.Row="1">
-            <Image x:Name = "headerImage"  Grid.Column="0" HorizontalAlignment="Left" Width="40" Height="40" RenderOptions.BitmapScalingMode="HighQuality" />
-            <TextBlock x:Name="headerTitle" Grid.Column="1" Text="Beagle Player" FontWeight="Bold" FontSize="18" Height="40" Padding="8,7,0,0" />
+        <StackPanel x:Name="headerPanel" Orientation="Horizontal" Grid.Column="0" Grid.Row="1" Margin="10,0">
+            <Image x:Name = "headerImage"  HorizontalAlignment="Left" Width="40" Height="40" RenderOptions.BitmapScalingMode="HighQuality" />
+            <TextBlock x:Name="headerTitle" Text="Beagle Player" FontWeight="Bold" FontSize="18" Height="40" Padding="8,7,0,0" />
         </StackPanel>
         <StackPanel Grid.Column="0" Grid.Row="3">
             <Grid >
@@ -65,7 +77,7 @@
             <Grid Height="60" >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="300"/>
+                    <ColumnDefinition Width="190"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
@@ -75,14 +87,14 @@
                     <Image x:Name="control_Next_Image" Width="60" Height="60" RenderOptions.BitmapScalingMode="HighQuality" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0" OpacityMask="White"  />
                 </StackPanel>
 
-                <StackPanel Grid.Column="2" Height="70" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <TextBlock x:Name = "control_Timestamp" TextAlignment="Center" TextWrapping="Wrap" Text="00:00/01:42" Margin="0,15,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="20" Width="117" />
+                <StackPanel Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock x:Name = "control_Timestamp" TextAlignment="Center" TextWrapping="Wrap" Text="00:00/01:42" Margin="0,2,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" FontSize="20" Width="117" />
                     <Slider x:Name="control_Volume_Slider" Width="120" Maximum="100" Height="20" VerticalAlignment="Top" Margin="0" HorizontalAlignment="Center"/>
                 </StackPanel>
 
-                <StackPanel Width="Auto" Height="Auto" HorizontalAlignment="Left" VerticalAlignment="Top" Orientation="Horizontal" Margin="10,5,0,0">
+                <StackPanel Width="Auto" Height="60"  Orientation="Horizontal" Margin="10,0,0,0">
                     <Image x:Name="nowPlaying_Art" Width="60" Height="60" Grid.Column="0" Margin="0,0,10,0" RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <StackPanel x:Name="nowPlaying_Details" Width="100" Height="60">
+                    <StackPanel x:Name="nowPlaying_Details" Height="60" Margin="0,0,5,0">
                         <TextBlock x:Name="nowPlaying_Title" Text="Test"/>
                         <TextBlock x:Name="nowPlaying_Album" Text="Test"/>
                         <TextBlock x:Name="nowPlaying_Artist" Text="Test"/>
@@ -90,11 +102,11 @@
                 </StackPanel>
             </Grid>
         </StackPanel>
-        <ListView x:Name="mainListView" Grid.Row="2" Margin="10" >
+        <ListView x:Name="mainListView" Grid.Row="2" Margin="10,10,10,0"  GridViewColumnHeader.Click="GridViewColumnHeaderClickedHandler">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Title" DisplayMemberBinding="{Binding Title}" Width="250"/>
-                    <GridViewColumn Header="Length" DisplayMemberBinding="{Binding Length}" Width="80"/>
+                    <GridViewColumn Header="Length" DisplayMemberBinding="{Binding LengthDisplay}" Width="80"/>
                     <GridViewColumn Header="Album" DisplayMemberBinding="{Binding AlbumName}" Width="400"/>
                 </GridView>
             </ListView.View>

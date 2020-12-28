@@ -13,7 +13,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Drawing;
 using System.IO;
+using System.ComponentModel;
 
 using TagLib;
 
@@ -32,6 +34,8 @@ namespace Music_Player_WPF
         private PlayerButton button_Play;
         private PlayerButton button_Next;
         private PlayerButton button_Previous;
+
+        private System.ComponentModel.BackgroundWorker backgroundWorker1;
 
         public float SliderToVolume
         {
@@ -65,42 +69,116 @@ namespace Music_Player_WPF
             MyConstants.init();
 
             //Temp
-            //Remove old songs need to create cache
+            backgroundWorker1 = new BackgroundWorker();
+            BackgroundWorkerSetup();
+            backgroundWorker1.RunWorkerAsync();
 
-            if (this.mainListView.Items.Count > 0)
-            {
-                for (int i = 0; i < this.mainListView.Items.Count; i++)
-                {
-                    this.mainListView.Items.RemoveAt(0);
-                }
-            }
-
-
-            //Temp
-            AddSongs();
+            //AddSongs();
 
             MainGrid.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
             MainGrid.Arrange(new Rect(0, 0, MainGrid.DesiredSize.Width, MainGrid.DesiredSize.Height));
 
             playlist = new List<SongData>();
+
             
+        }
+
+        private void AudioPlayer_Stopped(object sender, CSCore.SoundOut.PlaybackStoppedEventArgs e)
+        {
+            Console.WriteLine("Playback stopped");
+        }
+
+        private void BackgroundWorkerSetup()
+        {
+            backgroundWorker1.DoWork += new DoWorkEventHandler(backgroundWorker1_DoWork);
+
+            backgroundWorker1.RunWorkerCompleted += new RunWorkerCompletedEventHandler(backgroundWorker1_RunWorkerCompleted);
+
+            backgroundWorker1.ProgressChanged += new ProgressChangedEventHandler(backgroundWorker1_ProgressChanged);
+
+            backgroundWorker1.WorkerReportsProgress = true;
+        }
+
+        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        {
+            // Get the BackgroundWorker that raised this event.
+            BackgroundWorker worker = sender as BackgroundWorker;
+
+            MediaTools.ScanCacheForSongsWorker(worker, e);
+        }
+        private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            AddSongs();
+        }
+        private void backgroundWorker1_ProgressChanged(object sender,ProgressChangedEventArgs e)
+        {
+            this.progressBar1.Value = e.ProgressPercentage;
+        }
+
+
+        GridViewColumnHeader _lastHeaderClicked = null;
+        ListSortDirection _lastDirection = ListSortDirection.Ascending;
+
+        void GridViewColumnHeaderClickedHandler(object sender, RoutedEventArgs e)
+        {
+            GridViewColumnHeader headerClicked = e.OriginalSource as GridViewColumnHeader;
+            ListSortDirection direction;
+
+            if (headerClicked != null)
+            {
+                if (headerClicked.Role != GridViewColumnHeaderRole.Padding)
+                {
+                    if (headerClicked != _lastHeaderClicked)
+                    {
+                        direction = ListSortDirection.Ascending;
+                    }
+                    else
+                    {
+                        if (_lastDirection == ListSortDirection.Ascending)
+                        {
+                            direction = ListSortDirection.Descending;
+                        }
+                        else
+                        {
+                            direction = ListSortDirection.Ascending;
+                        }
+                    }
+
+                    string header = headerClicked.Column.Header as string;
+                    Sort(header, direction);
+
+                    _lastHeaderClicked = headerClicked;
+                    _lastDirection = direction;
+                }
+            }
+        }
+
+        private void Sort(string sortBy, ListSortDirection direction)
+        {
+            ICollectionView dataView = mainListView.Items;
+
+            dataView.SortDescriptions.Clear();
+            SortDescription sd = new SortDescription(sortBy, direction);
+            dataView.SortDescriptions.Add(sd);
+            dataView.Refresh();
+        }
+
+        private void ClearSongs()
+        {
+            this.mainListView.Items.Clear();
         }
 
         private void AddSongs()
         {
-            Dictionary<string, AlbumData> albums_found = null;
-            if (albums_found != null)
+            foreach (KeyValuePair<string, AlbumData> t in MediaTools.albums)
             {
-                foreach (KeyValuePair<string, AlbumData> t in albums_found)
+                for (int i = 0; i < t.Value.tracks.Count; i++)
                 {
-                    for (int i = 0; i < t.Value.tracks.Count; i++)
-                    {
-                        SongData temp_song = t.Value.tracks[i];
-                        this.mainListView.Items.Add(temp_song);
-                    }
+                    this.mainListView.Items.Add(t.Value.tracks[i]);
                 }
             }
         }
+
         private void StyleControls()
         {
             //Create button objects to add hover effect (Prolly not the best way but it works)
@@ -145,6 +223,25 @@ namespace Music_Player_WPF
 
             //Cleanup before closing
             this.Closing += new System.ComponentModel.CancelEventHandler(Window_Closing);
+
+            this.testButton.Click += new RoutedEventHandler(testClicked);
+
+        }
+
+        private void testClicked(object sender, RoutedEventArgs e)
+        {
+            Console.WriteLine("test clicked");
+            List<AlbumData> found_albums = MediaTools.GetAlbumByArtist("Alice in Chains");
+
+            ClearSongs();
+
+            for( int i = 0; i < found_albums.Count; i++ )
+            {
+                for( int j = 0; j < found_albums[i].tracks.Count; j++ )
+                {
+                    this.mainListView.Items.Add(found_albums[i].tracks[j]);
+                }
+            }
         }
 
         private void PlaybackBar_Clicked(object sender, MouseEventArgs e)
@@ -162,11 +259,23 @@ namespace Music_Player_WPF
 
             for (int i = 0; i < MyConstants.user_preferences.music_directories.Count; i++)
             {
-                win2.listPaths.Items.Add(MyConstants.user_preferences.music_directories[i]);
+                ListBoxItem lbi = new ListBoxItem();
+                lbi.Content = MyConstants.user_preferences.music_directories[i];
+                win2.listPaths.Items.Add(lbi);
             }
 
+            
             win2.pathButton.Click += new RoutedEventHandler(SetPath_Button_Clicked);
             win2.configSave.Click += new RoutedEventHandler(SaveConfig_Button_Clicked);
+            win2.removePath.Click += new RoutedEventHandler(RemoveSelectedPath_Clicked);
+            win2.scanSongs.Click += new RoutedEventHandler(ScanButton_Clicked);
+            win2.clearCache.Click += new RoutedEventHandler(ClearCache_Clicked);
+        }
+
+        private void ClearCache_Clicked(object sender, RoutedEventArgs e)
+        {
+            MediaTools.ClearCache();
+            ClearSongs();
         }
 
         private void SetPath_Button_Clicked(object sender, RoutedEventArgs e)
@@ -194,6 +303,18 @@ namespace Music_Player_WPF
                 MyConstants.user_preferences.music_directories.Add(lbi.Content.ToString());
                 Console.WriteLine("Saved directory : " + lbi.Content.ToString());
             }
+            MyConstants.SavePreferences();
+        }
+
+        private void RemoveSelectedPath_Clicked(object sender, RoutedEventArgs e)
+        {
+            win2.listPaths.Items.Remove(win2.listPaths.SelectedItem);
+        }
+
+        private void ScanButton_Clicked(object sender, RoutedEventArgs e)
+        {
+            ClearSongs();
+            AddSongs();
         }
 
         private void Volume_Changed(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -216,19 +337,31 @@ namespace Music_Player_WPF
             var item = (sender as ListView).SelectedItem;
             if (item != null)
             {
+                //Setup caching of art by artist perhaps?
+                string cache_directory = MyConstants.CurrentDirectory + @"\" + MyConstants.CacheDirectory + @"\";
+
                 SongData i = (SongData)item;
+                playlistListView.Items.Add(i);
+
+                //Set now playing details
+                nowPlaying_Title.Text = i.Title;
+                nowPlaying_Album.Text = i.AlbumName;
+                nowPlaying_Artist.Text = i.Artist;
+                try
+                {
+                    BitmapImage im = UsefulFunctions.LoadBitmapImage(cache_directory + i.AlbumGUID);
+                    nowPlaying_Art.Source = im;
+                }
+                catch (System.Exception)
+                {
+                    nowPlaying_Art.Source = MediaTools.DefaultSongCover;
+                }
+
+
                 AudioPlayer.Open(i.path);
                 AudioPlayer.Play();
                 AudioPlayer.currentLength = AudioPlayer.GetLengthString();
-
-                playlistListView.Items.Add(i);
-
-                //Setup caching of art by artist perhaps?
-                //nowPlaying_Art.Source = UsefulFunctions.GetAlbumArt(tfile);
-
-                nowPlaying_Title.Text = i.Title;
-                nowPlaying_Album.Text = i.AlbumName; 
-                nowPlaying_Artist.Text = i.Artist;
+                AudioPlayer.soundOut.Stopped += new EventHandler<CSCore.SoundOut.PlaybackStoppedEventArgs>(AudioPlayer_Stopped);
             }
         }
 

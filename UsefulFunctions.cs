@@ -5,9 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 using System.IO;
+using System.Windows.Controls;
 
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.ComponentModel;
+using System.Windows.Data;
 
 using TagLib;
 
@@ -15,6 +18,22 @@ namespace Music_Player_WPF
 {
     public static class UsefulFunctions
 	{
+		public static List<string> GetAllFilePaths(string path)
+        {
+			List<string> directories = Directory.GetDirectories(path, "*", System.IO.SearchOption.AllDirectories).ToList();
+			directories.Add(path);
+
+			List<string> file_paths = new List<string>();
+			for( int i = 0; i < directories.Count; i++ )
+            {
+				file_paths.AddRange(Directory.GetFiles(directories[i]).ToList());
+			}
+
+			//Get Size for debugging
+			Console.WriteLine("Amount of files " + file_paths.Count);
+			return file_paths;
+		}
+
 		public static int Clamp(int i, int min, int max)
         {
 			if (i > max)
@@ -35,6 +54,19 @@ namespace Music_Player_WPF
 			}
 		}
 
+		public static BitmapImage SaveBitmapImageFromStream(MemoryStream ms, int width, int height)
+        {
+			var bitmap = new BitmapImage();
+			bitmap.BeginInit();
+			bitmap.DecodePixelWidth = width;
+			bitmap.DecodePixelHeight = height;
+			bitmap.StreamSource = ms;
+			bitmap.CacheOption = BitmapCacheOption.OnLoad;
+			bitmap.EndInit();
+			bitmap.Freeze();
+			return bitmap;
+		}
+
 		public static bool IsPathValid(string path)
 		{
 			bool exists = false;
@@ -48,6 +80,11 @@ namespace Music_Player_WPF
 				return false;
 			}
 		}
-        
+
+		public static BitmapImage LoadBitmapImage(string path)
+        {
+			BitmapImage bImage = new BitmapImage(new Uri(@path));
+			return bImage;
+		}
 	}
 }

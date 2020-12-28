@@ -18,8 +18,13 @@
                     <TextBox Name="pathTextBox" Width="200" Height="20" Margin="0,0,5,0" HorizontalAlignment="Left" VerticalAlignment="Top"></TextBox>
                     <Button Name="pathButton" Width="80" Height="20" Content="Add Path" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                 </StackPanel>
-                <Button Name="configSave" Content="Save Paths" Width="80" Height="20" Grid.Row="2"/>
-                <ListBox x:Name="listPaths" HorizontalAlignment="Left" Height="61" Margin="5,10,0,0" Grid.Row="1" VerticalAlignment="Top" Width="371"/>
+                <ListBox x:Name="listPaths" Grid.Row="1" />
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Button Name="removePath" Content="Remove Path" Width="80" Height="20" Margin="5" />
+                    <Button x:Name="configSave" Content="Save Paths" Width="80" Height="20" Margin="5"/>
+                    <Button x:Name="scanSongs" Content="Scan" Width="80" Height="20" Margin="5"/>
+                    <Button x:Name="clearCache" Content="Clear Cache" Width="80" Height="20" Margin="5"/>
+                </StackPanel>
             </Grid>
         </TabItem>
         <TabItem Header="Appearance">
